@@ -1,6 +1,11 @@
-Pi-FM-RDS
-=========
+Pi-FM-RDS-Extra
+===============
 
+## FOR THE LOVE OF GOD, DO NOT USE THIS VERSION
+
+I am working on a version of Pi-FM-RDS with some extra functionality. I am also learning how to use Git and Github, so not only will the code probably destroy your Pi, I might have screwed up the versioning too.
+
+[This is the version you want to use](https://github.com/Blenderpics/PiFmRds/tree/preemphasis), so stop reading this and go there.
 
 ## FM-RDS transmitter using the Raspberry Pi
 
