@@ -55,3 +55,6 @@ dkms.conf
 *.wav
 *.mp3
 *.sh
+
+#Backup files
+*~
