@@ -564,47 +564,67 @@ int main(int argc, char **argv) {
         if((strcmp("-wav", arg)==0 || strcmp("-audio", arg)==0) && param != NULL) {
             i++;
             audio_file = param;
-        } else if(strcmp("-freq", arg)==0 && param != NULL) {
+        } 
+
+        else if(strcmp("-freq", arg)==0 && param != NULL) {
             i++;
             carrier_freq = 1e6 * atof(param);
             if(carrier_freq < 76e6 || carrier_freq > 108e6)
                 fatal("Incorrect frequency specification. Must be in megahertz, of the form 107.9, between 76 and 108.\n");
-        } else if(strcmp("-pi", arg)==0 && param != NULL) {
+        } 
+
+        else if(strcmp("-pi", arg)==0 && param != NULL) {
             i++;
             pi = (uint16_t) strtol(param, NULL, 16);
-        } else if(strcmp("-ps", arg)==0 && param != NULL) {
+        } 
+
+        else if(strcmp("-ps", arg)==0 && param != NULL) {
             i++;
             ps = param;
-        } else if(strcmp("-rt", arg)==0 && param != NULL) {
+        } 
+
+        else if(strcmp("-rt", arg)==0 && param != NULL) {
             i++;
             rt = param;
-        } else if(strcmp("-ppm", arg)==0 && param != NULL) {
+        } 
+
+        else if(strcmp("-ppm", arg)==0 && param != NULL) {
             i++;
             ppm = atof(param);
-        } else if(strcmp("-ctl", arg)==0 && param != NULL) {
+        } 
+
+        else if(strcmp("-ctl", arg)==0 && param != NULL) {
             i++;
             control_pipe = param;
-		} else if(strcmp("-preemph", arg)==0 && param != NULL) {
-			i++;
-			if(strcmp("eu", param)==0) {
-				preemphasis_cutoff = PREEMPHASIS_EU;
-			} else if(strcmp("us", param)==0) {
-				preemphasis_cutoff = PREEMPHASIS_US;
-			}
-			else {
-				preemphasis_cutoff = atof(param);
-			}
-		} else if(strcmp("-cutoff", arg)==0 && param != NULL) {
-			i++;
-			if(strcmp("compliant", param)==0) {
-				cutoff = CUTOFF_COMPLIANT;
-			} else if(strcmp("quality", param)==0) {
-				cutoff = CUTOFF_QUALITY;
-			}
-			else {
-				cutoff = atof(param);
-			}
-        } else {
+        } 
+
+        else if(strcmp("-preemph", arg)==0 && param != NULL) {
+            i++;
+            if(strcmp("eu", param)==0) {
+                preemphasis_cutoff = PREEMPHASIS_EU;
+            } 
+            else if(strcmp("us", param)==0) {
+                preemphasis_cutoff = PREEMPHASIS_US;
+            }
+            else {
+                preemphasis_cutoff = atof(param);
+            }
+        } 
+
+        else if(strcmp("-cutoff", arg)==0 && param != NULL) {
+            i++;
+            if(strcmp("compliant", param)==0) {
+                cutoff = CUTOFF_COMPLIANT;
+            } 
+            else if(strcmp("quality", param)==0) {
+                cutoff = CUTOFF_QUALITY;
+            }
+            else {
+                cutoff = atof(param);
+            }
+        } 
+
+        else {
             fatal("Unrecognised argument: %s.\n"
             "Syntax: pi_fm_rds [-freq freq] [-audio file] [-ppm ppm_error] [-pi pi_code]\n"
             "                  [-ps ps_text] [-rt rt_text] [-ctl control_pipe]\n", arg);
