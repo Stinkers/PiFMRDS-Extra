@@ -50,3 +50,11 @@ modules.order
 Module.symvers
 Mkfile.old
 dkms.conf
+
+#Test files
+*.wav
+*.mp3
+*.sh
+
+#Backup files
+*~
