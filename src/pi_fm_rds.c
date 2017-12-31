@@ -234,8 +234,6 @@ udelay(int us)
     nanosleep(&ts, NULL);
 }
 
-/* Todo: Need to set up gpio_reg and clk_reg before calling this from main */
-
 static void cw_off()
 {
     // Stop outputting and generating the clock.
