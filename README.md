@@ -1,27 +1,23 @@
 Pi-FM-RDS-Extra
 ===============
 
-## FOR THE LOVE OF GOD, DO NOT USE THIS VERSION
-
-I am working on a version of Pi-FM-RDS with some extra functionality. I am also learning how to use Git and Github, so not only will the code probably destroy your Pi, I might have screwed up the versioning too.
-
-[This is the version you want to use](https://github.com/Blenderpics/PiFmRds/tree/preemphasis), so stop reading this and go there.
-
 ## FM-RDS transmitter using the Raspberry Pi
 
 This program generates an FM modulation, with RDS (Radio Data System) data generated in real time. It can include monophonic or stereophonic audio.
 
 It is based on the FM transmitter created by [Oliver Mattos and Oskar Weigl](http://www.icrobotics.co.uk/wiki/index.php/Turning_the_Raspberry_Pi_Into_an_FM_Transmitter), and later adapted to using DMA by [Richard Hirst](https://github.com/richardghirst). Christophe Jacquet adapted it and added the RDS data generator and modulator. The transmitter uses the Raspberry Pi's PWM generator to produce VHF signals.
-[Pre-emphasis was added by Blenderpics](https://github.com/Blenderpics/PiFmRds/tree/preemphasis)
+[Pre-emphasis was added by ](https://github.com/Blenderpics/PiFmRds/tree/preemphasis)
 which improved the sound quality immensely. It has now been forked to
 include extra functionality, namely the ability to control the CW signal
 directly from the command line. If you are using PiFM to stream music, this stops clicking between tracks when the
 carrier would have stopped and then started again. Adding ```-cw on```
 keeps the carrier on when PiFM exits. ```-cw off``` turns off the carrier
 and exits the program immediately. No option or ```-cw auto``` stops the
-carrier on exit.
+carrier on exit. An audio gain option has also been added e.g. ```-ag 4```
+applies a gain of 4 to the modulation. ```-ag 0.5``` will halve the volume.
 
-It is compatible with both the Raspberry Pi 1 (the original one) and the Raspberry Pi 2.
+It is compatible with both the Raspberry Pi 1 (the original one), the Raspberry Pi 2
+and Rasberry Pi 3.
 
 ![](doc/vfd_display.jpg)
 
@@ -78,7 +74,8 @@ All arguments are optional:
 * `-ppm` specifies your Raspberry Pi's oscillator error in parts per million (ppm), see below.
 * `-cutoff` specifies the cutoff frequency (in Hz, 'compliant' for 15,000Hz or 'quality' for 22,050Hz) used by Pi-FM-RDS' internal lowpass filter. Values greater than 15000 are not compliant. Use carefully.
 * `-preemph` specifies which preemph should be used, since it differs from location. For Europe choose 'eu', for the US choose 'us'.
-
+* `-cw` specifies whether the carrier is turned off on exit. `-cw on` leaves it on when the program exits. `-cw off` turns it off and exits immediately. `-cw auto` (default) turns off the carrier on exit. 
+* `-ag` specifies the gain applied to the modulation, i.e. the gain of the audio. The gain is applied after preemphasis and should be used if the audio level is too low but compensating by increasing the input level causes distortion.
 By default the PS changes back and forth between `Pi-FmRds` and a sequence number, starting at `00000000`. The PS changes around one time per second.
 
 
