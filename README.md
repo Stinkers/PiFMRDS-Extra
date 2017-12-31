@@ -6,7 +6,7 @@ Pi-FM-RDS-Extra
 This program generates an FM modulation, with RDS (Radio Data System) data generated in real time. It can include monophonic or stereophonic audio.
 
 It is based on the FM transmitter created by [Oliver Mattos and Oskar Weigl](http://www.icrobotics.co.uk/wiki/index.php/Turning_the_Raspberry_Pi_Into_an_FM_Transmitter), and later adapted to using DMA by [Richard Hirst](https://github.com/richardghirst). Christophe Jacquet adapted it and added the RDS data generator and modulator. The transmitter uses the Raspberry Pi's PWM generator to produce VHF signals.
-[Pre-emphasis was added by ](https://github.com/Blenderpics/PiFmRds/tree/preemphasis)
+[Pre-emphasis was added by Blenderpics](https://github.com/Blenderpics/PiFmRds/tree/preemphasis)
 which improved the sound quality immensely. It has now been forked to
 include extra functionality, namely the ability to control the CW signal
 directly from the command line. If you are using PiFM to stream music, this stops clicking between tracks when the
