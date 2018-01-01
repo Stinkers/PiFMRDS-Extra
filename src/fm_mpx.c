@@ -69,6 +69,7 @@ int channels;
 float *last_buffer_val;
 float preemphasis_prewarp;
 float preemphasis_coefficient;
+float audio_gain = 1;
 
 SNDFILE *inf;
 
@@ -198,8 +199,7 @@ int fm_mpx_get_samples(float *mpx_buffer) {
                         for(k=0;k<audio_len;k+=channels) {
                             for(l=0;l<channels;l++) {
                                 tmp = audio_buffer[k+l];
-                                audio_buffer[k+l] = audio_buffer[k+l] - preemphasis_coefficient*last_buffer_val[l];
-/* Here would be the place to put in the gain */
+                                audio_buffer[k+l] = (audio_buffer[k+l] - preemphasis_coefficient*last_buffer_val[l]) * audio_gain;
 
                                 last_buffer_val[l] = tmp;
                             }

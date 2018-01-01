@@ -75,7 +75,7 @@ All arguments are optional:
 * `-cutoff` specifies the cutoff frequency (in Hz, 'compliant' for 15,000Hz or 'quality' for 22,050Hz) used by Pi-FM-RDS' internal lowpass filter. Values greater than 15000 are not compliant. Use carefully.
 * `-preemph` specifies which preemph should be used, since it differs from location. For Europe choose 'eu', for the US choose 'us'.
 * `-cw` specifies whether the carrier is turned off on exit. `-cw on` leaves it on when the program exits. `-cw off` turns it off and exits immediately. `-cw auto` (default) turns off the carrier on exit. 
-* `-ag` specifies the gain applied to the modulation, i.e. the gain of the audio. The gain is applied after preemphasis and should be used if the audio level is too low but compensating by increasing the input level causes distortion.
+* `-ag` specifies the gain applied to the modulation, i.e. the gain of the audio. The gain is applied after preemphasis and can be used if the audio level is too low but compensating by increasing the input level causes distortion.
 
 By default the PS changes back and forth between `Pi-FmRds` and a sequence number, starting at `00000000`. The PS changes around one time per second.
 
