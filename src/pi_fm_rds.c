@@ -213,6 +213,8 @@ static volatile uint32_t *clk_reg;
 static volatile uint32_t *dma_reg;
 static volatile uint32_t *gpio_reg;
 
+static volatile char exit_cw_off = 1;	// 0 = leave on, 1 = turn off
+
 struct control_data_s {
     dma_cb_t cb[NUM_CBS];
     uint32_t sample[NUM_SAMPLES];
@@ -232,17 +234,25 @@ udelay(int us)
     nanosleep(&ts, NULL);
 }
 
-static void
-terminate(int num)
+static void cw_off()
 {
     // Stop outputting and generating the clock.
-    if (clk_reg && gpio_reg && mbox.virt_addr) {
+    if (clk_reg && gpio_reg) {
+        printf ("Terminating: Killing the carrier\n");
+
         // Set GPIO4 to be an output (instead of ALT FUNC 0, which is the clock).
         gpio_reg[GPFSEL0] = (gpio_reg[GPFSEL0] & ~(7 << 12)) | (1 << 12);
 
         // Disable the clock generator.
         clk_reg[GPCLK_CNTL] = 0x5A;
     }
+}
+    
+
+static void
+terminate(int num)
+{
+    if (exit_cw_off) cw_off();
 
     if (dma_reg && mbox.virt_addr) {
         dma_reg[DMA_CS] = BCM2708_DMA_RESET;
@@ -253,12 +263,12 @@ terminate(int num)
     close_control_pipe();
 
     if (mbox.virt_addr != NULL) {
+        printf("Terminating: cleanly deactivated the DMA engine.\n");
         unmapmem(mbox.virt_addr, NUM_PAGES * 4096);
         mem_unlock(mbox.handle, mbox.mem_ref);
         mem_free(mbox.handle, mbox.mem_ref);
     }
 
-    printf("Terminating: cleanly deactivated the DMA engine and killed the carrier.\n");
     
     exit(num);
 }
@@ -323,8 +333,6 @@ int tx(uint32_t carrier_freq, char *audio_file, uint16_t pi, char *ps, char *rt,
         
     dma_reg = map_peripheral(DMA_VIRT_BASE, DMA_LEN);
     pwm_reg = map_peripheral(PWM_VIRT_BASE, PWM_LEN);
-    clk_reg = map_peripheral(CLK_VIRT_BASE, CLK_LEN);
-    gpio_reg = map_peripheral(GPIO_VIRT_BASE, GPIO_LEN);
 
     // Use the mailbox interface to the VC to ask for physical memory.
     mbox.handle = mbox_open();
@@ -553,6 +561,9 @@ int main(int argc, char **argv) {
 	float cutoff = CUTOFF_COMPLIANT;
 	float preemphasis_cutoff = PREEMPHASIS_US;
     
+    // Move this into main so -cw off can use it
+    clk_reg = map_peripheral(CLK_VIRT_BASE, CLK_LEN);
+    gpio_reg = map_peripheral(GPIO_VIRT_BASE, GPIO_LEN);
     
     // Parse command-line arguments
     for(int i=1; i<argc; i++) {
@@ -561,50 +572,87 @@ int main(int argc, char **argv) {
         
         if(arg[0] == '-' && i+1 < argc) param = argv[i+1];
         
-        if((strcmp("-wav", arg)==0 || strcmp("-audio", arg)==0) && param != NULL) {
+        /* New option to control CW:
+           -cw on : Leave the CW transmitting on exit.
+           -cw off : Turn off the transmitter and exit immediately.
+           -cw auto : Turn off the transmitter on exit (default).
+        */
+
+        if (strcmp ("-cw", arg) == 0 && param != NULL) {
+            i++;
+            if (strcmp ("off", param) == 0) {
+                exit_cw_off = 1;
+                terminate(0);	// Exit nicely.
+            }
+            if (strcmp ("on", param) == 0) {
+                exit_cw_off = 0;
+            }
+        }
+            
+        else if((strcmp("-wav", arg)==0 || strcmp("-audio", arg)==0) && param != NULL) {
             i++;
             audio_file = param;
-        } else if(strcmp("-freq", arg)==0 && param != NULL) {
+        } 
+
+        else if(strcmp("-freq", arg)==0 && param != NULL) {
             i++;
             carrier_freq = 1e6 * atof(param);
             if(carrier_freq < 76e6 || carrier_freq > 108e6)
                 fatal("Incorrect frequency specification. Must be in megahertz, of the form 107.9, between 76 and 108.\n");
-        } else if(strcmp("-pi", arg)==0 && param != NULL) {
+        } 
+
+        else if(strcmp("-pi", arg)==0 && param != NULL) {
             i++;
             pi = (uint16_t) strtol(param, NULL, 16);
-        } else if(strcmp("-ps", arg)==0 && param != NULL) {
+        } 
+
+        else if(strcmp("-ps", arg)==0 && param != NULL) {
             i++;
             ps = param;
-        } else if(strcmp("-rt", arg)==0 && param != NULL) {
+        } 
+
+        else if(strcmp("-rt", arg)==0 && param != NULL) {
             i++;
             rt = param;
-        } else if(strcmp("-ppm", arg)==0 && param != NULL) {
+        } 
+
+        else if(strcmp("-ppm", arg)==0 && param != NULL) {
             i++;
             ppm = atof(param);
-        } else if(strcmp("-ctl", arg)==0 && param != NULL) {
+        } 
+
+        else if(strcmp("-ctl", arg)==0 && param != NULL) {
             i++;
             control_pipe = param;
-		} else if(strcmp("-preemph", arg)==0 && param != NULL) {
-			i++;
-			if(strcmp("eu", param)==0) {
-				preemphasis_cutoff = PREEMPHASIS_EU;
-			} else if(strcmp("us", param)==0) {
-				preemphasis_cutoff = PREEMPHASIS_US;
-			}
-			else {
-				preemphasis_cutoff = atof(param);
-			}
-		} else if(strcmp("-cutoff", arg)==0 && param != NULL) {
-			i++;
-			if(strcmp("compliant", param)==0) {
-				cutoff = CUTOFF_COMPLIANT;
-			} else if(strcmp("quality", param)==0) {
-				cutoff = CUTOFF_QUALITY;
-			}
-			else {
-				cutoff = atof(param);
-			}
-        } else {
+        } 
+
+        else if(strcmp("-preemph", arg)==0 && param != NULL) {
+            i++;
+            if(strcmp("eu", param)==0) {
+                preemphasis_cutoff = PREEMPHASIS_EU;
+            } 
+            else if(strcmp("us", param)==0) {
+                preemphasis_cutoff = PREEMPHASIS_US;
+            }
+            else {
+                preemphasis_cutoff = atof(param);
+            }
+        } 
+
+        else if(strcmp("-cutoff", arg)==0 && param != NULL) {
+            i++;
+            if(strcmp("compliant", param)==0) {
+                cutoff = CUTOFF_COMPLIANT;
+            } 
+            else if(strcmp("quality", param)==0) {
+                cutoff = CUTOFF_QUALITY;
+            }
+            else {
+                cutoff = atof(param);
+            }
+        } 
+
+        else {
             fatal("Unrecognised argument: %s.\n"
             "Syntax: pi_fm_rds [-freq freq] [-audio file] [-ppm ppm_error] [-pi pi_code]\n"
             "                  [-ps ps_text] [-rt rt_text] [-ctl control_pipe]\n", arg);
