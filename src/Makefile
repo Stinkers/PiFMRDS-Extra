@@ -51,4 +51,4 @@ fm_mpx.o: fm_mpx.c fm_mpx.h
 	$(CC) $(CFLAGS) fm_mpx.c
 
 clean:
-	rm *.o
+	rm -r *.o
