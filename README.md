@@ -1,23 +1,14 @@
-Pi-FM-RDS-Extra
-===============
+Pi-FM-RDS
+=========
+
 
 ## FM-RDS transmitter using the Raspberry Pi
 
 This program generates an FM modulation, with RDS (Radio Data System) data generated in real time. It can include monophonic or stereophonic audio.
 
 It is based on the FM transmitter created by [Oliver Mattos and Oskar Weigl](http://www.icrobotics.co.uk/wiki/index.php/Turning_the_Raspberry_Pi_Into_an_FM_Transmitter), and later adapted to using DMA by [Richard Hirst](https://github.com/richardghirst). Christophe Jacquet adapted it and added the RDS data generator and modulator. The transmitter uses the Raspberry Pi's PWM generator to produce VHF signals.
-[Pre-emphasis was added by Blenderpics](https://github.com/Blenderpics/PiFmRds/tree/preemphasis)
-which improved the sound quality immensely. It has now been forked to
-include extra functionality, namely the ability to control the CW signal
-directly from the command line. If you are using PiFM to stream music, this stops clicking between tracks when the
-carrier would have stopped and then started again. Adding ```-cw on```
-keeps the carrier on when PiFM exits. ```-cw off``` turns off the carrier
-and exits the program immediately. No option or ```-cw auto``` stops the
-carrier on exit. An audio gain option has also been added e.g. ```-ag 4```
-applies a gain of 4 to the modulation. ```-ag 0.5``` will halve the volume.
 
-It is compatible with both the Raspberry Pi 1 (the original one), the Raspberry Pi 2
-and Rasberry Pi 3.
+It is compatible with both the Raspberry Pi 1 (the original one) and the Raspberry Pi 2 and 3.
 
 ![](doc/vfd_display.jpg)
 
@@ -27,9 +18,9 @@ PiFmRds has been developed for experimentation only. It is not a media center, i
 
 Pi-FM-RDS, depends on the `sndfile` library. To install this library on Debian-like distributions, for instance Raspbian, run `sudo apt-get install libsndfile1-dev`.
 
-Pi-FM-RDS also depends on the Linux `rpi-mailbox` driver, so you need a recent Linux kernel. The Raspbian releases from August 2015 have this.
+Pi-FM-RDS also depends on the Linux `rpi-mailbox` driver, so you need a recent Linux kernel. The Raspbian releases have this starting from August 2015.
 
-**Important.** The binaries compiled for the Raspberry Pi 1 are not compatible with the Raspberry Pi 2, and conversely. Always re-compile when switching models, so do not skip the `make clean` step in the instructions below!
+**Important.** The binaries compiled for the Raspberry Pi 1 are not compatible with the Raspberry Pi 2/3, and conversely. Always re-compile when switching models, so do not skip the `make clean` step in the instructions below!
 
 Clone the source repository and run `make` in the `src` directory:
 
@@ -40,7 +31,9 @@ make clean
 make
 ```
 
-Then you can just run:
+**Important.** If `make` reports any error, then no `pi_fm_rds` executable file is generated (and vice versa). So any error must be fixed before you can proceed to the next steps. `make` may fail if any required library is missing (see above), or it could be a bug on a specific/newer distribution. In this case, please file a bug.
+
+If `make` reports no error (i.e. the `pi_fm_rds` executable gets generated), you can then simply run:
 
 ```
 sudo ./pi_fm_rds
@@ -60,7 +53,7 @@ To test stereophonic audio, you can try the file `stereo_44100.wav` provided.
 The more general syntax for running Pi-FM-RDS is as follows:
 
 ```
-pi_fm_rds [-freq freq] [-audio file] [-ppm ppm_error] [-pi pi_code] [-ps ps_text] [-rt rt_text] [-cutoff cutoff_freq] [-preemph preemphasis_mode] [-cw <on/off/auto>] [-ag <gain>]
+pi_fm_rds [-freq freq] [-audio file] [-ppm ppm_error] [-pi pi_code] [-ps ps_text] [-rt rt_text]
 ```
 
 All arguments are optional:
@@ -72,12 +65,9 @@ All arguments are optional:
 * `-rt` specifies the radiotext (RT) to be transmitted. Limit: 64 characters. Example: `-rt 'Hello, world!'`.
 * `-ctl` specifies a named pipe (FIFO) to use as a control channel to change PS and RT at run-time (see below).
 * `-ppm` specifies your Raspberry Pi's oscillator error in parts per million (ppm), see below.
-* `-cutoff` specifies the cutoff frequency (in Hz, 'compliant' for 15,000Hz or 'quality' for 22,050Hz) used by Pi-FM-RDS' internal lowpass filter. Values greater than 15000 are not compliant. Use carefully.
-* `-preemph` specifies which preemph should be used, since it differs from location. For Europe choose 'eu', for the US choose 'us'.
-* `-cw` specifies whether the carrier is turned off on exit. `-cw on` leaves it on when the program exits. `-cw off` turns it off and exits immediately. `-cw auto` (default) turns off the carrier on exit. 
-* `-ag` specifies the gain applied to the modulation, i.e. the gain of the audio. The gain is applied after preemphasis and can be used if the audio level is too low but compensating by increasing the input level causes distortion.
 
 By default the PS changes back and forth between `Pi-FmRds` and a sequence number, starting at `00000000`. The PS changes around one time per second.
+
 
 ### Clock calibration (only if experiencing difficulties)
 
@@ -181,7 +171,7 @@ The shaped biphase symbol is generated once and for all by a Python program call
 
 Internally, the program samples all signals at 228 kHz, four times the RDS subcarrier's 57 kHz.
 
-The FM multiplex signal (baseband signal) is generated by `fm_mpx.c`. This file handles the upsampling of the input audio file to 228 kHz, and the generation of the multiplex: unmodulated left+right signal (limited to 15 kHz), possibly the stereo pilot at 19 kHz, possibly the left-right signal, amplitude-modulated on 38 kHz (suppressed carrier) and RDS signal from `rds.c`. Upsampling is performed using a zero-order hold followed by an FIR low-pass filter of order 60. The filter is a sampled sinc windowed by a Hamming window. The filter coefficients are generated at startup so that the filter cuts frequencies above the minimum of:
+The FM multiplex signal (baseband signal) is generated by `fm_mpx.c`. This file handles the upsampling of the input audio file to 228 kHz, and the generation of the multiplex: unmodulated left+right signal (limited to 15 kHz), possibly the stereo pilot at 19 kHz, possibly the left-right signal, amplitude-modulated on 38 kHz (suppressed carrier) and RDS signal from `rds.c`. Upsampling is performed using a zero-order hold followed by an FIR low-pass filter of order 60. The filter is a sampled sinc windowed by a Hamming window. The filter coefficients are generated at startup so that the filter cuts frequencies above the minimum of:
 * the Nyquist frequency of the input audio file (half the sample rate) to avoid aliasing,
 * 15 kHz, the bandpass of the left+right and left-right channels, as per the FM broadcasting standards.
 
@@ -195,7 +185,7 @@ The samples are played by `pi_fm_rds.c` that is adapted from Richard Hirst's [Pi
 
 ## History
 
-* 2015-09-05: support for the Raspberry Pi 2
+* 2015-09-05: support for the Raspberry Pi 2 and later models
 * 2014-11-01: support for toggling the Traffic Announcement (TA) flag at run-time
 * 2014-10-19: bugfix (cleanly stop the DMA engine when the specified file does not exist, or it's not possible to read from stdin)
 * 2014-08-04: bugfix (ppm now uses floats)
@@ -207,4 +197,4 @@ The samples are played by `pi_fm_rds.c` that is adapted from Richard Hirst's [Pi
 
 --------
 
-© [Christophe Jacquet](http://www.jacquet80.eu/) (F8FTK), 2014-2015. Released under the GNU GPL v3.
+© [Christophe Jacquet](http://www.jacquet80.eu/) (F8FTK), 2014-2019. Released under the GNU GPL v3.
